@@ -2,16 +2,15 @@
   "name": "frontend",
   "private": true,
   "version": "0.0.0",
-  "homepage": "https://santhosht12345.github.io/library-management",
+  "homepage": "https://SanthoshT12345.github.io/library-management",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "lint": "eslint .",
-    "preview": "vite preview",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist"
-  },
+  "dev": "vite",
+  "build": "vite build",
+  "deploy": "gh-pages -d dist",
+  "preview": "vite preview"
+}
+,
   "dependencies": {
     "axios": "^1.13.2",
     "react": "^19.2.0",

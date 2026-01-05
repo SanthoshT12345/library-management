@@ -114,14 +114,15 @@ export default function BookList({ isAdmin }) {
           flexWrap: "wrap",
           gap: "20px",
           justifyContent: "center",
-          marginTop: "20px"
+          
         }}
       >
         {searchedBooks.map(book => (
           <div
             key={book._id}
             style={{
-              width: "320px",
+              width: "100%",
+              maxWidth: "320px",
               border: "1px solid #ccc",
               padding: "12px",
               borderRadius: "8px",

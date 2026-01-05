@@ -47,6 +47,8 @@ export default function BookList({ isAdmin }) {
   const handleEditDetails = async (book) => {
     const newTitle = prompt("Edit title:", book.title);
     if (!newTitle) return;
+    const newAuthor = prompt("Edit author:", book.author);
+  if (!newAuthor) return;
 
     const newCategory = prompt("Edit category:", book.category);
     if (!newCategory) return;
@@ -57,6 +59,7 @@ export default function BookList({ isAdmin }) {
     try {
       await updateBookDetails(book._id, {
         title: newTitle,
+        author: newAuthor, 
         category: newCategory,
         publishedYear: Number(newYear)
       });

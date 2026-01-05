@@ -1,7 +1,8 @@
 import axios from "axios";
 
 
-const BASE_URL = "https://library-backend-bnlm.onrender.com/api/books";
+const API_URL = import.meta.env.VITE_API_URL + "/api/books";
+
 
 
 

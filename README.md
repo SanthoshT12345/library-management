@@ -56,3 +56,5 @@ Express.js
 Database
 
 MongoDB (or MySQL — specify whichever you used)
+
+deployed Link- https://musical-moonbeam-bedc13.netlify.app/

@@ -1,13 +1,13 @@
-import axios from "axios";
+import API from "../api/axios";
 
-const BASE_URL = import.meta.env.VITE_API_URL + "/api/borrowers";
+const BASE_URL = "/borrowers";
 
 export const getBorrowers = async () => {
-  const res = await axios.get(BASE_URL);
+  const res = await API.get(BASE_URL);
   return res.data;
 };
 
 export const addBorrower = async (borrowerData) => {
-  const res = await axios.post(BASE_URL, borrowerData);
+  const res = await API.post(BASE_URL, borrowerData);
   return res.data;
 };

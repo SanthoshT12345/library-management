@@ -18,37 +18,27 @@ export default function Dashboard({ books }) {
   const totalCategories = categories.size;
 
   return (
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(4, 1fr)",
-        gap: "15px",
-        marginBottom: "20px"
-      }}
-    >
-      <Card title="Total Books" value={totalBooks} />
-      <Card title="Total Copies" value={totalCopies} />
-      <Card title="Out of Stock" value={outOfStock} />
-      <Card title="Categories" value={totalCategories} />
+    <div className="dashboard-grid" style={{ marginBottom: "24px" }}>
+      <Card title="Total Books" value={totalBooks} icon="📚" color="var(--primary-color)" />
+      <Card title="Total Copies" value={totalCopies} icon="📑" color="var(--secondary-color)" />
+      <Card title="Out of Stock" value={outOfStock} icon="⚠️" color="var(--danger-color)" />
+      <Card title="Categories" value={totalCategories} icon="🏷️" color="#f59e0b" />
     </div>
   );
 }
 
-function Card({ title, value }) {
+function Card({ title, value, icon, color }) {
   return (
-    <div
-      style={{
-        padding: "15px",
-        borderRadius: "8px",
-         background:"linear-gradient(brown,#CD5646FF)",
-        textAlign: "center",
-        boxShadow: "0 2px 5px rgba(0,0,0,0.1)"
-      }}
-    >
-      <h3>{title}</h3>
-      <p style={{ fontSize: "22px", fontWeight: "bold" }}>
-        {value}
-      </p>
+    <div className="glass-card" style={{ display: "flex", alignItems: "center", gap: "16px", padding: "20px" }}>
+      <div style={{ fontSize: "2.5rem", background: `rgba(255,255,255,0.05)`, padding: "12px", borderRadius: "12px", border: `1px solid ${color}` }}>
+        {icon}
+      </div>
+      <div>
+        <h3 style={{ margin: "0 0 4px 0", fontSize: "1rem", color: "var(--text-muted)" }}>{title}</h3>
+        <p style={{ margin: "0", fontSize: "1.8rem", fontWeight: "bold", color: "var(--text-main)" }}>
+          {value}
+        </p>
+      </div>
     </div>
   );
 }

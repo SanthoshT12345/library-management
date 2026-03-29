@@ -1,17 +1,20 @@
 const express = require("express");
+const {
+  addBook,
+  getAllBooks,
+  updateCopies,
+  updateAuthor,
+  updateBookDetails,
+  deleteBook
+} = require("../controllers/bookController");
+
 const router = express.Router();
-const controller = require("../controllers/bookController");
 
-router.post("/", controller.addBook);
-router.get("/", controller.getAllBooks);
-
-// ⚠️ MORE SPECIFIC ROUTES FIRST
-router.put("/:id/copies", controller.updateCopies);
-
-
-// ⚠️ GENERIC ROUTE LAST
-router.put("/:id", controller.updateBookDetails);
-
-router.delete("/:id", controller.deleteBook);
+router.post("/", addBook);
+router.get("/", getAllBooks);
+router.put("/:id/copies", updateCopies);
+router.put("/:id/author", updateAuthor);
+router.put("/:id", updateBookDetails);
+router.delete("/:id", deleteBook);
 
 module.exports = router;

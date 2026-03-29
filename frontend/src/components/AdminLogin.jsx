@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export default function AdminLogin({ onLogin }) {
+export default function AdminLogin({ onLogin, onCancel }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -18,32 +18,43 @@ export default function AdminLogin({ onLogin }) {
   };
 
   return (
-    <div style={{ maxWidth: "300px", margin: "auto" }}>
-      <h2>Admin Login</h2>
+    <div className="glass-card" style={{ width: "100%", maxWidth: "400px" }}>
+      <h2 style={{ textAlign: "center", marginBottom: "24px" }}>Admin Login</h2>
 
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          placeholder="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          required
-        />
-        <br /><br />
+      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+        <div>
+          <input
+            className="input-field"
+            type="text"
+            placeholder="Username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+          />
+        </div>
 
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <br /><br />
+        <div>
+          <input
+            className="input-field"
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </div>
 
-        <button type="submit">Login</button>
+        {error && <p style={{ color: "var(--danger-color)", fontSize: "0.9rem", margin: "0" }}>{error}</p>}
+
+        <div className="flex-row" style={{ marginTop: "10px" }}>
+          <button type="button" className="btn-outline" style={{ flex: 1 }} onClick={onCancel}>
+            Cancel
+          </button>
+          <button type="submit" className="btn-primary" style={{ flex: 1 }}>
+            Login
+          </button>
+        </div>
       </form>
-
-      {error && <p style={{ color: "red" }}>{error}</p>}
     </div>
   );
 }

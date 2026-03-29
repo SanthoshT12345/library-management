@@ -9,6 +9,8 @@ export default function AddBook({ onBookAdded }) {
     publishedYear: "",
     availableCopies: ""
   });
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const handleChange = (e) => {
     setFormData({
@@ -19,6 +21,8 @@ export default function AddBook({ onBookAdded }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+    setSuccess("");
 
     try {
       await addBook({
@@ -35,32 +39,32 @@ export default function AddBook({ onBookAdded }) {
         availableCopies: ""
       });
 
-      onBookAdded(); // refresh book list
+      setSuccess("Book added successfully!");
+      if (onBookAdded) onBookAdded();
     } catch (err) {
-      alert("Failed to add book");
+      setError("Failed to add book");
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ marginBottom: "20px",display:"flex",gap:"3px",alignItems:"center"}}>
-      <h3>Add New Book :</h3>
+    <div>
+      <h3 style={{ marginBottom: "16px", display: "flex", alignItems: "center", gap: "8px" }}>
+        <span>➕</span> Add New Book
+      </h3>
+      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+        <input className="input-field" name="title" placeholder="Title" value={formData.title} onChange={handleChange} required />
+        <input className="input-field" name="author" placeholder="Author" value={formData.author} onChange={handleChange} required />
+        <input className="input-field" name="category" placeholder="Category" value={formData.category} onChange={handleChange} required />
+        
+        <div className="flex-row">
+          <input className="input-field" name="publishedYear" type="number" placeholder="Year" value={formData.publishedYear} onChange={handleChange} required />
+          <input className="input-field" name="availableCopies" type="number" placeholder="Copies" value={formData.availableCopies} onChange={handleChange} required />
+        </div>
 
-      <input name="title" placeholder="Title" value={formData.title} onChange={handleChange} required />
-      <br />
-
-      <input name="author" placeholder="Author" value={formData.author} onChange={handleChange} required />
-      <br />
-
-      <input name="category" placeholder="Category" value={formData.category} onChange={handleChange} required />
-      <br />
-
-      <input name="publishedYear" type="number" placeholder="Published Year" value={formData.publishedYear} onChange={handleChange} required />
-      <br />
-
-      <input name="availableCopies" type="number" placeholder="Available Copies" value={formData.availableCopies} onChange={handleChange} required />
-      <br /><br />
-
-      <button type="submit">Add Book</button>
-    </form>
+        <button type="submit" className="btn-primary" style={{ marginTop: "8px" }}>Add Book</button>
+        {error && <p style={{ color: "var(--danger-color)", margin: "0", fontSize: "0.9rem" }}>{error}</p>}
+        {success && <p style={{ color: "var(--secondary-color)", margin: "0", fontSize: "0.9rem" }}>{success}</p>}
+      </form>
+    </div>
   );
 }

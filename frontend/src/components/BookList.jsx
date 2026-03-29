@@ -1,6 +1,13 @@
+
+import { getBorrowers } from "../services/borrowerService";
+import { borrowBook, returnBook } from "../services/borrowService";
+import BorrowDashboard from "./BorrowDashboard";
+
 import { useEffect, useState } from "react";
 import Dashboard from "./Dashboard";
 import AddBook from "./AddBook";
+import AddBorrower from "./AddBorrower";
+import BorrowerList from "./BorrowerList";
 
 import {
   getAllBooks,
@@ -14,6 +21,14 @@ export default function BookList({ isAdmin }) {
   const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [after2015Only, setAfter2015Only] = useState(false);
+  const [borrowers, setBorrowers] = useState([]);
+  const [showBorrowDashboard, setShowBorrowDashboard] = useState(false);
+  const [showBorrowers, setShowBorrowers] = useState(false);
+
+  const loadBorrowers = async () => {
+    const data = await getBorrowers();
+    setBorrowers(data);
+  };
 
   const loadBooks = async () => {
     const data = await getAllBooks();
@@ -22,7 +37,24 @@ export default function BookList({ isAdmin }) {
 
   useEffect(() => {
     loadBooks();
+    loadBorrowers();
   }, []);
+
+  const handleReturn = async () => {
+    const borrowId = prompt("Enter Borrow ID to return book:");
+    if (!borrowId) return;
+
+    try {
+      console.log("Returning borrow ID:", borrowId);
+      const res = await returnBook(borrowId);
+      console.log("Return response:", res);
+      loadBooks();
+      alert("Book returned successfully");
+    } catch (err) {
+      console.error("Frontend return error:", err.response?.data || err.message);
+      alert("Return failed. Check console.");
+    }
+  };
 
   const handleUpdate = async (id, change) => {
     try {
@@ -48,7 +80,7 @@ export default function BookList({ isAdmin }) {
     const newTitle = prompt("Edit title:", book.title);
     if (!newTitle) return;
     const newAuthor = prompt("Edit author:", book.author);
-  if (!newAuthor) return;
+    if (!newAuthor) return;
 
     const newCategory = prompt("Edit category:", book.category);
     if (!newCategory) return;
@@ -59,7 +91,7 @@ export default function BookList({ isAdmin }) {
     try {
       await updateBookDetails(book._id, {
         title: newTitle,
-        author: newAuthor, 
+        author: newAuthor,
         category: newCategory,
         publishedYear: Number(newYear)
       });
@@ -67,6 +99,37 @@ export default function BookList({ isAdmin }) {
       setError("");
     } catch {
       setError("Book details update failed");
+    }
+  };
+
+  const handleBorrow = async (bookId) => {
+    if (borrowers.length === 0) {
+      alert("No borrowers found. Add borrower first.");
+      return;
+    }
+
+    const email = prompt("Enter Borrower Email (e.g., cs23192@velammalitech.edu.in):");
+    if (!email) return;
+
+    const normalizedEmail = email.trim().toLowerCase();
+    const borrower = borrowers.find(b => b.email.toLowerCase() === normalizedEmail);
+    
+    if (!borrower) {
+      alert(`Borrower with email "${email}" not found in the Library Borrowers list. Please check for typos or add them first.`);
+      return;
+    }
+
+    try {
+      await borrowBook({
+        bookId,
+        studentId: borrower._id,
+        email: borrower.email
+      });
+      loadBooks();
+      alert("Book borrowed successfully!");
+    } catch (err) {
+      console.error("Borrow Error:", err);
+      alert("Borrow failed: " + (err.response?.data?.error || err.message));
     }
   };
 
@@ -83,100 +146,148 @@ export default function BookList({ isAdmin }) {
     });
 
   return (
-    <div style={{ maxWidth: "1200px", margin: "auto" }}>
-      <input
-        type="text"
-        placeholder="Search by title, author, or category..."
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        style={{ width: "100%", padding: "8px", marginBottom: "15px" }}
-      />
-
-      <label style={{ display: "block", marginBottom: "10px" }}>
+    <div style={{ width: "100%" }}>
+      
+      {/* Search & Filter Top Bar */}
+      <div className="glass-card" style={{ marginBottom: "24px" }}>
         <input
-          type="checkbox"
-          checked={after2015Only}
-          onChange={(e) => setAfter2015Only(e.target.checked)}
-        />{" "}
-        Show books published after 2015
-      </label>
+          type="text"
+          className="input-field"
+          placeholder="🔍 Search by title, author, or category..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          style={{ marginBottom: "15px" }}
+        />
+
+        <label className="flex-row" style={{ cursor: "pointer", userSelect: "none" }}>
+          <input
+             type="checkbox"
+             checked={after2015Only}
+             onChange={(e) => setAfter2015Only(e.target.checked)}
+             style={{ width: "18px", height: "18px", accentColor: "var(--primary-color)" }}
+          />
+          <span style={{ fontSize: "1rem" }}>Show books published after 2015</span>
+        </label>
+      </div>
+
+      {isAdmin && showBorrowDashboard && (
+        <div style={{ marginBottom: "24px" }}>
+          <BorrowDashboard />
+        </div>
+      )}
 
       <Dashboard books={books} />
 
-      {isAdmin && <AddBook onBookAdded={loadBooks} />}
-
-      {error && <p style={{ color: "red" }}>{error}</p>}
-
-      {/* 📚 FLEX CONTAINER */}
-      <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: "20px",
-          justifyContent: "center",
-          
-        }}
-      >
-        {searchedBooks.map(book => (
-          <div
-            key={book._id}
-            style={{
-              width: "100%",
-              maxWidth: "320px",
-              border: "1px solid #ccc",
-              padding: "12px",
-              borderRadius: "8px",
-              background: "linear-gradient(brown,#CD5646FF)",
-              color: "white"
-            }}
+      {isAdmin && (
+        <div className="flex-wrap" style={{ marginBottom: "24px" }}>
+          <button
+             onClick={() => setShowBorrowDashboard(!showBorrowDashboard)}
+             className="btn-outline"
           >
-            <center> {isAdmin && (
-              <button
-                onClick={() => handleEditDetails(book)}
-                style={{ marginBottom: "10px" }}
-              >
-                ✏️ Edit Details
-              </button>
-            )}</center>
-           
+             📊 Borrow Dashboard
+          </button>
+          
+          <button
+             onClick={() => setShowBorrowers(!showBorrowers)}
+             className="btn-outline"
+          >
+             👥 View Borrowers
+          </button>
+        </div>
+      )}
 
-            <p><b>Title:</b> {book.title}</p>
-            <p><b>Author:</b> {book.author}</p>
-            <p><b>Category:</b> {book.category}</p>
-            <p><b>Year:</b> {book.publishedYear}</p>
-            <p><b>Copies:</b> {book.availableCopies}</p>
+      {isAdmin && showBorrowers && (
+        <div style={{ marginBottom: "24px" }}>
+          <BorrowerList borrowers={borrowers} />
+        </div>
+      )}
 
-            {isAdmin && (
-              <>
-                <button onClick={() => handleUpdate(book._id, +1)}>➕</button>
-                <button
-                  onClick={() => handleUpdate(book._id, -1)}
-                  style={{ marginLeft: "6px" }}
-                >
-                  ➖
+      {isAdmin && (
+        <div className="glass-card" style={{ marginBottom: "30px" }}>
+          <div className="flex-wrap" style={{ gap: "40px" }}>
+            <div style={{ flex: "1 1 min-content" }}>
+              <AddBook onBookAdded={loadBooks} />
+            </div>
+            <div style={{ width: "1px", background: "var(--surface-border)" }} className="divider"></div>
+            <div style={{ flex: "1 1 min-content" }}>
+              <AddBorrower onBorrowerAdded={loadBorrowers} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {error && <p style={{ color: "var(--danger-color)", padding: "10px", background: "rgba(239, 68, 68, 0.1)", borderRadius: "8px" }}>{error}</p>}
+
+      {/* 📚 BOOK GRID */}
+      <div className="dashboard-grid">
+        {searchedBooks.map(book => (
+          <div key={book._id} className="glass-card" style={{ display: "flex", flexDirection: "column" }}>
+            
+            <div style={{ flexGrow: 1 }}>
+              <h3 style={{ marginBottom: "12px", fontSize: "1.2rem", color: "var(--primary-color)" }}>{book.title}</h3>
+              <p style={{ margin: "6px 0", fontSize: "0.95rem" }}>
+                <span style={{ color: "var(--text-muted)" }}>Author:</span> {book.author}
+              </p>
+              <p style={{ margin: "6px 0", fontSize: "0.95rem" }}>
+                <span style={{ color: "var(--text-muted)" }}>Category:</span> <span className="badge" style={{ background: "rgba(255,255,255,0.1)" }}>{book.category}</span>
+              </p>
+              <p style={{ margin: "6px 0", fontSize: "0.95rem" }}>
+                <span style={{ color: "var(--text-muted)" }}>Year:</span> {book.publishedYear}
+              </p>
+              <p style={{ margin: "6px 0", fontSize: "0.95rem", fontWeight: "600", color: book.availableCopies > 0 ? "var(--secondary-color)" : "var(--danger-color)" }}>
+                Copies: {book.availableCopies}
+              </p>
+            </div>
+
+            <div style={{ marginTop: "20px", display: "flex", flexDirection: "column", gap: "10px" }}>
+              {isAdmin && (
+                <>
+                  <div className="flex-between">
+                    <span style={{ fontSize: "0.85rem", color: "var(--text-muted)" }}>Stock Mgmt:</span>
+                    <div className="flex-row" style={{ gap: "6px" }}>
+                      <button className="btn-outline" style={{ padding: "4px 8px" }} onClick={() => handleUpdate(book._id, -1)} disabled={book.availableCopies === 0}>➖</button>
+                      <button className="btn-outline" style={{ padding: "4px 8px" }} onClick={() => handleUpdate(book._id, 1)}>➕</button>
+                    </div>
+                  </div>
+                  
+                  <div className="flex-row" style={{ flexWrap: "wrap", marginTop: "10px" }}>
+                    <button className="btn-outline" style={{ flex: 1, fontSize: "0.85rem", padding: "6px" }} onClick={() => handleEditDetails(book)}>
+                      ✏️ Edit
+                    </button>
+                    <button 
+                      className="btn-danger" 
+                      style={{ flex: 1, fontSize: "0.85rem", padding: "6px" }} 
+                      disabled={book.availableCopies !== 0} 
+                      onClick={() => handleDelete(book._id)}
+                    >
+                      ❌ Delete
+                    </button>
+                  </div>
+                </>
+              )}
+
+              {isAdmin && book.availableCopies > 0 && (
+                <button className="btn-secondary" style={{ width: "100%" }} onClick={() => handleBorrow(book._id)}>
+                  📚 Borrow
                 </button>
-
-                <button
-                  onClick={() => handleDelete(book._id)}
-                  disabled={book.availableCopies !== 0}
-                  style={{
-                    marginLeft: "8px",
-                    backgroundColor:
-                      book.availableCopies === 0 ? "red" : "gray",
-                    color: "white"
-                  }}
-                >
-                  ❌ Delete
+              )}
+              {isAdmin && (
+                <button className="btn-primary" style={{ width: "100%" }} onClick={handleReturn}>
+                  🔁 Return
                 </button>
-              </>
-            )}
+              )}
+            </div>
 
-            <p style={{ color: isAdmin ? "lightgreen" : "lightblue" }}>
-              Role: {isAdmin ? "Admin" : "User"}
-            </p>
           </div>
         ))}
       </div>
+      
+      {searchedBooks.length === 0 && (
+        <div className="glass-card" style={{ textAlign: "center", padding: "40px" }}>
+           <p style={{ color: "var(--text-muted)", fontSize: "1.1rem" }}>No books found matching your criteria.</p>
+        </div>
+      )}
+      
     </div>
   );
 }
